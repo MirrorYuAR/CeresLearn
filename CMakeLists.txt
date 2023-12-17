@@ -13,6 +13,7 @@ list(APPEND OBJECTS_TO_LINK ${CERES_LIBRARIES})
 
 set(TEST_LIST
   TestHelloWorld
+  TestHelloWorldAnalytic
 )
 
 foreach(TEST ${TEST_LIST})
