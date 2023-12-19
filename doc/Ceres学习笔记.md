@@ -93,5 +93,42 @@ public:
 };
 ```
 
+## 4.鲍威尔方程(Powell's Function)
+ - 最小化鲍威尔方程，令$x=[x_{1}, x_{2}, x_{3}, x_{4}]$：
+$$
+f_{1}(x) = x_{1} + 10x_{2} \\ f_{2}(x) = \sqrt{5}(x_{3}-x_{4}) \\ f_{3}(x)=(x_{2}-2x_{3})^{2} \\ f_{4}(x)=\sqrt{10}(x_{1} - x_{4})^{2} \\ F(x)=[f_{1}(x), f_{2}(x), f_{3}(x), f_{4}(x)]
+$$ 
+ - $F(x)$是一个有四个参数的函数，对应四个残差，我们希望找到一个$x$使得$\frac{1}{2}\left \| F(x) \right \|^{2} $最小。
+ - 第一步定义函数来评估目标函数的每一个项，对应$f_{4}(x_{1}, x_{4})$：
+```C++
+struct F4 {
+  template <typename T>
+  bool operator()(const T *const x1, const T *const x4, T *residual) const {
+    redisual[0] = sqrt(10.0) * (x1[0] - x4[0]) * (x1[0] - x4[0]);
+    return true;
+  }
+};
+```
+ - 同样的可以定义$f_{1}(x_{1}, x_{2}), f_{2}(x_{3}, x_{4}), f_{3}(x_{2}, x_{3})$，问题可以构造成如下：
+```C++
+double x1 = 3.0, x2 = -1.0, x3 = 0.0, x4 = 1.0;
+
+ceres::Problem problem;
+problem.AddResidualBlock(new ceres::AutoDiffCostFunction<F1, 1, 1, 1>(new F1), nullptr, &x1, &x2);
+problem.AddResidualBlock(new ceres::AutoDiffCostFunction<F2, 1, 1, 1>(new F2), nullptr, &x3, &x4);
+problem.AddResidualBlock(new ceres::AutoDiffCostFunction<F3, 1, 1, 1>(new F3), nullptr, &x2, &x3);
+problem.AddResidualBlock(new ceres::AutoDiffCostFunction<F4, 1, 1, 1>(new F4), nullptr, &x1, &x4);
+```
+ - 最后进行优化：
+```C++
+ceres::Solver::Options options;
+options.max_num_iterations = 100;
+options.linear_solver_type = ceres::DENSE_QR;
+options.minimizer_progress_to_stdout = true;
+
+ceres::Solver::Summary summary;
+ceres::Solve(options, &problem, &summary);
+```
+
 
 
