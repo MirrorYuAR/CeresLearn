@@ -130,5 +130,48 @@ ceres::Solver::Summary summary;
 ceres::Solve(options, &problem, &summary);
 ```
 
+## 5.曲线拟合
+ - 最小二乘和非线性最小二乘分析的最初目的是拟合曲线。现在考虑一个例子，数据是通过采样曲线$y=e^{0.3x + 0.1}$，并添加标准差为$\sigma = 0.2$的高斯噪声，然后拟合曲线：
+$$
+y=e^{mx+c}
+$$
+ - 第一步定义目标模板来估算残差：
+```C++
+struct ExponentialResidual {
+  ExponentialRedisual(double x, double y) : x_(x), y_(y) {}
+
+  template<typename T>
+  bool operator()(const T *const m, const T *const c, T *redisual) {
+    redidual[0] = y_ - exp(m[0] * x_ + c[0]);
+    return true;
+  }
+
+private:
+  const double x_;
+  const double y_;
+};
+```
+ - 假设观测量data是长度为2n大小的数组，问题构造对应简单对每一个观测量创建一个CostFunction：
+```C++
+double m = 0.0;
+double c = 0.0;
+
+ceres::Problem problem;
+for (int i = 0; i < kNumObservations; ++i) {
+  ceres::CostFunction *cost_function = new ceres::AutoDiffCostFunction<ExponentialResidual, 1, 1, 1>(new ExponentialResidual(data[2 * i], data[2 * i + 1]));
+  problem.AddRedisualBlock(cost_function, nullptr, &m, &c);
+}
+```
+ - 最后，进行优化：
+```C++
+ceres::Solver::Options options;
+options.max_num_iterations = 25;
+options.linear_solver_type = ceres::DENSE_QR;
+options.minimizer_progress_to_stdout = true;
+
+ceres::Solver::Summary summary;
+ceres::Solve(options, &problem, &summary);
+```
+
 
 
