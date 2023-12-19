@@ -16,6 +16,7 @@ set(TEST_LIST
   TestHelloWorldAnalytic
   TestPowell
   TestCurveFiting
+  TestBundleAdjuster
 )
 
 foreach(TEST ${TEST_LIST})
