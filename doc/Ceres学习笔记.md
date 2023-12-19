@@ -227,7 +227,7 @@ struct SnavelyReprojectionError {
   double observed_y;
 }
 ```
- - 由于这是一个大稀疏问题(对于DENSE_QR太大了)，一个方法是将问题(problem)的线性求解类型(Solver::Options::linear_solver_type)设置为SPARSE_NORMAL_CHOLESKY；与此同时，由于BA问题具有册数的稀疏结构，更合理的做法是找寻一种更加高效的方法，Ceres提供了三个特殊求解器(Schur-based solvers)。
+ - 由于这是一个大稀疏问题(对于DENSE_QR太大了)，一个方法是将问题(problem)的线性求解类型(Solver::Options::linear_solver_type)设置为SPARSE_NORMAL_CHOLESKY；与此同时，由于BA问题具有特殊的稀疏结构，更合理的做法是找寻一种更加高效的方法，Ceres提供了三个特殊求解器(Schur-based solvers)。
 ```C++
 ceres::Solver::Options options;
 options.linear_solver_type = ceres::DENSE_SCHUR;
